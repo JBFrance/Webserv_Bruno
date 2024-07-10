@@ -1,37 +1,44 @@
+# Name of the executable
 NAME     = webserv
-GCC      = c++
+
+# Compiler and compiler flags
+GCC      = g++
 CFLAGS   = -Wall -Wextra -Werror -std=c++98  #-g -fsanitize=address
 RM       = rm -rf
-OUTPUT   = ./$(NAME)
+
+# Directories
+SRC      = srcs
+OBJ      = objects
+SUBDIRS  = server main parsing
+
+# Directory paths
+SRC_DIR  = $(addprefix $(SRC)/,$(SUBDIRS))
+OBJ_DIR  = $(addprefix $(OBJ)/,$(SUBDIRS))
+
+# Source and object files
+SRCS     = $(foreach dir,$(SRC_DIR),$(wildcard $(dir)/*.cpp))
+OBJS     = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(SRCS))
+
+# Include directories
 LIBS     = -I./includes/
 
-# Compiled directories
-SRC = srcs
-OBJ = objects
-SUBDIRS = server main
-
-# Folder directions
-SRC_DIR = $(foreach dir, $(SUBDIRS), $(addprefix $(SRC)/, $(dir)))
-OBJ_DIR = $(foreach dir, $(SUBDIRS), $(addprefix $(OBJ)/, $(dir)))
-
-# File directions
-SRCS = $(foreach dir, $(SRC_DIR), $(wildcard $(dir)/*.cpp))
-OBJS = $(subst $(SRC), $(OBJ), $(SRCS:.cpp=.o))
-
+# Make targets
 all: $(NAME)
 
 $(NAME): Makefile $(OBJS)
-	$(GCC) -o $(NAME) $(OBJS) -g $(CFLAGS) $(LIBS)
+	$(GCC) -o $(NAME) $(OBJS) $(CFLAGS) $(LIBS)
 
 $(OBJ)/%.o: $(SRC)/%.cpp
-	mkdir -p $(OBJ) $(OBJ_DIR)
+	mkdir -p $(@D)
 	$(GCC) $(CFLAGS) $(LIBS) -c $< -o $@
 
 clean:
 	$(RM) $(OBJ_DIR)
-	$(RM) $(OBJ)
 
 fclean: clean
 	$(RM) $(NAME)
 
 re: fclean all
+
+.PHONY: all clean fclean re
+
